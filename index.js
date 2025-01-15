@@ -25,6 +25,11 @@ async function run() {
       const result = await courseCollection.find({}).toArray();
       res.send(result);
     });
+    app.get('/api/feedbacks', async (req, res) => {
+      const feedbackCollection = client.db('EduManage').collection('Feedback');
+      const result = await feedbackCollection.find({}).toArray();
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log(
