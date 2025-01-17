@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use(express.json());
 app.use(cors());
@@ -21,8 +21,14 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     app.get('/api/courses', async (req, res) => {
-      const courseCollection = client.db('EduManage').collection('Cources');
+      const courseCollection = client.db('EduManage').collection('Courses');
       const result = await courseCollection.find({}).toArray();
+      res.send(result);
+    });
+    app.get('/api/courses/:id', async (req, res) => {
+      const id = req.params.id;
+      const courseCollection = client.db('EduManage').collection('Courses');
+      const result = await courseCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
     app.get('/api/feedbacks', async (req, res) => {
