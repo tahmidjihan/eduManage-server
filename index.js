@@ -36,6 +36,27 @@ async function run() {
       const result = await feedbackCollection.find({}).toArray();
       res.send(result);
     });
+    app.post('/api/users', async (req, res) => {
+      try {
+        const user = req.body;
+        const userCollection = client.db('EduManage').collection('Users');
+        const result = await userCollection.insertOne(user);
+        res.status(201).send(result);
+      } catch (error) {
+        // console.error(error);
+        res.status(500).send({ error: 'Something went wrong' });
+      }
+    });
+    app.get('/api/isUser/:email', async (req, res) => {
+      const email = req.params.email;
+      const userCollection = client.db('EduManage').collection('Users');
+      const result = await userCollection.findOne({ email: email });
+      if (result) {
+        res.send({ isUser: true });
+      } else {
+        res.send({ isUser: false });
+      }
+    });
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
     console.log(
