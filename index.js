@@ -47,6 +47,15 @@ async function run() {
       const result = await courseCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
+    app.patch('/api/courses/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const courseCollection = client.db('EduManage').collection('Courses');
+      const result = await courseCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: req.body }
+      );
+      res.send(result);
+    });
     app.get('/api/feedbacks', async (req, res) => {
       const feedbackCollection = client.db('EduManage').collection('Feedback');
       const result = await feedbackCollection.find({}).toArray();
