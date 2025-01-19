@@ -56,6 +56,12 @@ async function run() {
       try {
         const user = req.body;
         const userCollection = client.db('EduManage').collection('Users');
+        const existingUser = await userCollection.findOne({
+          email: user.email,
+        });
+        if (existingUser) {
+          return;
+        }
         const result = await userCollection.insertOne(user);
         res.status(201).send(result);
       } catch (error) {
