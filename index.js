@@ -78,6 +78,25 @@ async function run() {
         res.status(500).send({ error: 'Something went wrong' });
       }
     });
+    app.post('/api/enrolled', verifyJWT, async (req, res) => {
+      try {
+        const user = req.body;
+        const userCollection = client
+          .db('EduManage')
+          .collection('CourseEnrolled');
+        const existingUser = await userCollection.findOne({
+          email: user.email,
+        });
+        if (existingUser) {
+          return res.send({ status: 'user already enrolled in this course' });
+        }
+        const result = await userCollection.insertOne(user);
+        res.status(201).send(result);
+      } catch (error) {
+        // console.error(error);
+        res.status(500).send({ error: 'Something went wrong' });
+      }
+    });
     app.get('/api/users', verifyJWT, async (req, res) => {
       const userCollection = client.db('EduManage').collection('Users');
       const queries = req.query;
