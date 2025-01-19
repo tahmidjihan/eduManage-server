@@ -63,6 +63,18 @@ async function run() {
         res.status(500).send({ error: 'Something went wrong' });
       }
     });
+    app.get('/api/users', verifyJWT, async (req, res) => {
+      const userCollection = client.db('EduManage').collection('Users');
+      const queries = req.query;
+      if (queries.email) {
+        const result = await userCollection.findOne({ email: queries.email });
+        res.send(result);
+        return;
+      }
+
+      const result = await userCollection.find({}).toArray();
+      res.send(result);
+    });
     app.get('/api/isUser/:email', async (req, res) => {
       const email = req.params.email;
       const userCollection = client.db('EduManage').collection('Users');
