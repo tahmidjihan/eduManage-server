@@ -85,16 +85,7 @@ async function run() {
       );
       res.send(result);
     });
-    app.get('/api/isUser/:email', async (req, res) => {
-      const email = req.params.email;
-      const userCollection = client.db('EduManage').collection('Users');
-      const result = await userCollection.findOne({ email: email });
-      if (result) {
-        res.send({ isUser: true });
-      } else {
-        res.send({ isUser: false });
-      }
-    });
+
     app.post('/api/jwt', async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.SECRET, {
