@@ -75,6 +75,16 @@ async function run() {
       const result = await userCollection.find({}).toArray();
       res.send(result);
     });
+    app.patch('/api/users/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const user = req.body;
+      const userCollection = client.db('EduManage').collection('Users');
+      const result = await userCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: user }
+      );
+      res.send(result);
+    });
     app.get('/api/isUser/:email', async (req, res) => {
       const email = req.params.email;
       const userCollection = client.db('EduManage').collection('Users');
