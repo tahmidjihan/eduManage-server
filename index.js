@@ -65,38 +65,26 @@ async function run() {
       try {
         const user = req.body;
         const userCollection = client.db('EduManage').collection('Users');
+        await client
+          .db('EduManage')
+          .collection('Users')
+          .createIndex({ email: 1 }, { unique: true });
         const existingUser = await userCollection.findOne({
           email: user.email,
         });
         if (existingUser) {
           return;
+          // res.status(400).send({ error: 'User already exists' });
+        } else {
+          const result = await userCollection.insertOne(user);
+          res.status(201).send(result);
         }
-        const result = await userCollection.insertOne(user);
-        res.status(201).send(result);
       } catch (error) {
         // console.error(error);
         res.status(500).send({ error: 'Something went wrong' });
       }
     });
-    app.post('/api/enrolled', verifyJWT, async (req, res) => {
-      try {
-        const user = req.body;
-        const userCollection = client
-          .db('EduManage')
-          .collection('CourseEnrolled');
-        const existingUser = await userCollection.findOne({
-          email: user.email,
-        });
-        if (existingUser) {
-          return res.send({ status: 'user already enrolled in this course' });
-        }
-        const result = await userCollection.insertOne(user);
-        res.status(201).send(result);
-      } catch (error) {
-        // console.error(error);
-        res.status(500).send({ error: 'Something went wrong' });
-      }
-    });
+
     app.get('/api/users', verifyJWT, async (req, res) => {
       const userCollection = client.db('EduManage').collection('Users');
       const queries = req.query;
@@ -109,6 +97,11 @@ async function run() {
       const result = await userCollection.find({}).toArray();
       res.send(result);
     });
+    app.get('/api/users/admin', verifyJWT, async (req, res) => {
+      const userCollection = client.db('EduManage').collection('Users');
+      const result = await userCollection.find({ role: 'admin' }).toArray();
+      res.send(result);
+    });
     app.patch('/api/users/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const user = req.body;
@@ -119,7 +112,43 @@ async function run() {
       );
       res.send(result);
     });
-
+    app.get('/api/users/teacher', verifyJWT, async (req, res) => {
+      const userCollection = client.db('EduManage').collection('Users');
+      const result = await userCollection.find({ role: 'teacher' }).toArray();
+      res.send(result);
+    });
+    app.post('/api/enrolled', verifyJWT, async (req, res) => {
+      try {
+        const user = req.body;
+        const userCollection = client
+          .db('EduManage')
+          .collection('CourseEnrolled');
+        const existingUser = await userCollection.findOne({
+          email: user.email,
+        });
+        if (existingUser) {
+          return res.status(400).send({ error: 'User already enrolled' });
+        }
+        const result = await userCollection.insertOne(user);
+        res.status(201).send(result);
+      } catch (error) {
+        // console.error(error);
+        res.status(500).send({ error: 'Something went wrong' });
+      }
+    });
+    app.get('/api/enrolled', verifyJWT, async (req, res) => {
+      const userCollection = client
+        .db('EduManage')
+        .collection('CourseEnrolled');
+      const email = req.query.email;
+      if (email) {
+        const result = await userCollection.find({ email: email }).toArray();
+        res.send(result);
+        return;
+      }
+      const result = await userCollection.find({}).toArray();
+      res.send(result);
+    });
     app.post('/api/jwt', async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.SECRET, {
