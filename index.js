@@ -56,12 +56,57 @@ async function run() {
       );
       res.send(result);
     });
+    app.post('/api/courses', verifyJWT, async (req, res) => {
+      const body = req.body;
+      const result = await client
+        .db('EduManage')
+        .collection('Courses')
+        .insertOne(body)
+        .then((result) => {
+          res.send(result);
+        });
+    });
+    app.delete('/api/courses/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const courseCollection = client.db('EduManage').collection('Courses');
+      const result = await courseCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(result);
+    });
+    app.get('/api/courses/email/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const courseCollection = client.db('EduManage').collection('Courses');
+      const result = await courseCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
+    app.post('/api/assignments', async (req, res) => {
+      body = req.body;
+      const result = await client
+        .db('EduManage')
+        .collection('Assignments')
+        .insertOne(body)
+        .then((result) => {
+          res.send(result);
+        });
+    });
+    app.get('/api/assignments/course/:courseId', async (req, res) => {
+      const courseId = req.params.courseId;
+      const assignmentCollection = client
+        .db('EduManage')
+        .collection('Assignments');
+      const result = await assignmentCollection
+        .find({ courseId: courseId })
+        .toArray();
+      res.send(result);
+    });
+
     app.get('/api/feedbacks', async (req, res) => {
       const feedbackCollection = client.db('EduManage').collection('Feedback');
       const result = await feedbackCollection.find({}).toArray();
       res.send(result);
     });
-    app.post('/api/users', async (req, res) => {
+    app.post('/api/users', verifyJWT, async (req, res) => {
       try {
         const user = req.body;
         const userCollection = client.db('EduManage').collection('Users');
@@ -114,7 +159,9 @@ async function run() {
     });
     app.get('/api/users/teacher', verifyJWT, async (req, res) => {
       const userCollection = client.db('EduManage').collection('Users');
-      const result = await userCollection.find({ role: 'teacher' }).toArray();
+      const result = await userCollection
+        .find({ role: 'teacher', status: 'accepted' })
+        .toArray();
       res.send(result);
     });
     app.post('/api/enrolled', verifyJWT, async (req, res) => {
@@ -123,12 +170,6 @@ async function run() {
         const userCollection = client
           .db('EduManage')
           .collection('CourseEnrolled');
-        const existingUser = await userCollection.findOne({
-          email: user.email,
-        });
-        if (existingUser) {
-          return res.status(400).send({ error: 'User already enrolled' });
-        }
         const result = await userCollection.insertOne(user);
         res.status(201).send(result);
       } catch (error) {
@@ -136,6 +177,7 @@ async function run() {
         res.status(500).send({ error: 'Something went wrong' });
       }
     });
+
     app.get('/api/enrolled', verifyJWT, async (req, res) => {
       const userCollection = client
         .db('EduManage')
