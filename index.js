@@ -74,6 +74,36 @@ async function run() {
       });
       res.send(result);
     });
+    app.get('/api/courses/stats/:id', async (req, res) => {
+      const id = req.params.id;
+      const AssignmentSubmission = client
+        .db('EduManage')
+        .collection('AssignmentSubmission');
+      const assignment = client.db('EduManage').collection('Assignments');
+      const CourseEnrolled = client
+        .db('EduManage')
+        .collection('CourseEnrolled');
+      const result = await AssignmentSubmission.aggregate([
+        { $match: { courseId: id } },
+        { $group: { _id: '$assignmentId', count: { $sum: 1 } } },
+      ]).toArray();
+      const result2 = await assignment
+        .aggregate([
+          { $match: { courseId: id } },
+          { $group: { _id: '$courseId', count: { $sum: 1 } } },
+        ])
+        .toArray();
+      const result3 = await CourseEnrolled.aggregate([
+        { $match: { courseId: id } },
+        { $group: { _id: '$courseId', count: { $sum: 1 } } },
+      ]).toArray();
+      const data = {
+        assignmentSubmitted: result[0].count,
+        totalAssignment: result2[0].count,
+        enrolled: result3[0].count,
+      };
+      res.send(data);
+    });
     app.get('/api/courses/email/:email', verifyJWT, async (req, res) => {
       const email = req.params.email;
       const courseCollection = client.db('EduManage').collection('Courses');
@@ -90,17 +120,40 @@ async function run() {
           res.send(result);
         });
     });
-    app.get('/api/assignments/course/:courseId', async (req, res) => {
-      const courseId = req.params.courseId;
-      const assignmentCollection = client
+    app.get(
+      '/api/assignments/course/:courseId',
+      verifyJWT,
+      async (req, res) => {
+        const courseId = req.params.courseId;
+        const assignmentCollection = client
+          .db('EduManage')
+          .collection('Assignments');
+        const result = await assignmentCollection
+          .find({ courseId: courseId })
+          .toArray();
+        res.send(result);
+      }
+    );
+    app.post('/api/assignmentSubmit', verifyJWT, async (req, res) => {
+      body = req.body;
+      const result = await client
         .db('EduManage')
-        .collection('Assignments');
-      const result = await assignmentCollection
-        .find({ courseId: courseId })
-        .toArray();
-      res.send(result);
+        .collection('AssignmentSubmission')
+        .insertOne(body)
+        .then((result) => {
+          res.send(result);
+        });
     });
-
+    app.post('/api/feedbacks', async (req, res) => {
+      body = req.body;
+      const result = await client
+        .db('EduManage')
+        .collection('Feedback')
+        .insertOne(body)
+        .then((result) => {
+          res.send(result);
+        });
+    });
     app.get('/api/feedbacks', async (req, res) => {
       const feedbackCollection = client.db('EduManage').collection('Feedback');
       const result = await feedbackCollection.find({}).toArray();
@@ -159,9 +212,7 @@ async function run() {
     });
     app.get('/api/users/teacher', verifyJWT, async (req, res) => {
       const userCollection = client.db('EduManage').collection('Users');
-      const result = await userCollection
-        .find({ role: 'teacher', status: 'accepted' })
-        .toArray();
+      const result = await userCollection.find({ role: 'teacher' }).toArray();
       res.send(result);
     });
     app.post('/api/enrolled', verifyJWT, async (req, res) => {
