@@ -1,6 +1,6 @@
 
 
-# Gadget Havens - Server Side
+# Edumanage - Server Side
 
 ## Project Overview
 
@@ -18,7 +18,6 @@
 
 ### 1. Project Overview
 
-This backend server provides essential API routes for the **Gadget Havens** eCommerce site. It supports functionalities such as managing products, handling user authentication, and maintaining cart data with **MongoDB**. The server is built with **Express** and leverages **CORS** to ensure smooth cross-origin requests from the frontend.
 
 ### 2. Main Technologies Used
 
