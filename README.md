@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-🚀 **Gadget Havens - Server Side** is the backend of the eCommerce platform built using **Node.js**, **Express**, and **MongoDB**. This server handles user data, product information, and manages interactions with the database. It supports a seamless communication system with the frontend, ensuring smooth cart management, user authentication, and product search functionality.
+🚀 **Edu manage- Server Side** is the backend of the eCommerce platform built using **Node.js**, **Express**, and **MongoDB**. This server handles user data, product information, and manages interactions with the database. It supports a seamless communication system with the frontend, ensuring smooth cart management, user authentication, and product search functionality.
 
 ## Technologies Used
 
