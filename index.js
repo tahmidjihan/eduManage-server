@@ -41,7 +41,7 @@ async function run() {
       const result = await courseCollection.find({}).toArray();
       res.send(result);
     });
-    app.get('/api/courses/:id', verifyJWT, async (req, res) => {
+    app.get('/api/courses/:id', async (req, res) => {
       const id = req.params.id;
       const courseCollection = client.db('EduManage').collection('Courses');
       const result = await courseCollection.findOne({ _id: new ObjectId(id) });
@@ -66,7 +66,7 @@ async function run() {
           res.send(result);
         });
     });
-    app.delete('/api/courses/:id', async (req, res) => {
+    app.delete('/api/courses/:id', verifyJWT, async (req, res) => {
       const id = req.params.id;
       const courseCollection = client.db('EduManage').collection('Courses');
       const result = await courseCollection.deleteOne({
